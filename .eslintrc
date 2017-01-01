@@ -1,0 +1,6 @@
+{
+  "rules": {
+    // disable console for test commons
+    "no-console": "off"
+  }
+}

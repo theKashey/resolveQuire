@@ -1,0 +1,28 @@
+{
+  "name": "resolveQuire",
+  "version": "1.0.0",
+  "description": "Tool for proxyquire, will help a bit",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "npm run test:pick -- '_tests/**/*spec.js'",
+    "test:pick": "BABEL_ENV=test mocha --compilers js:babel-core/register",
+    "build": "babel src -d lib",
+    "prepublish": "npm run build"
+  },
+  "keywords": [
+    "proxyquire",
+    "path"
+  ],
+  "author": "Anton Korzunov (thekashey@gmail.com)",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "babel-preset-latest": "^6.16.0",
+    "babel-preset-react": "^6.11.1",
+    "babel-preset-stage-1": "^6.16.0",
+    "babel-register": "6.18.0",
+    "chai": "^3.5.0",
+    "mocha": "^3.0.2",
+    "proxyquire": "^1.7.10"
+  }
+}
