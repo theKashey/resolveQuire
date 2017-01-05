@@ -1,6 +1,8 @@
 Helper library for creating final stubs for [proxyquire](https://github.com/thlorenz/proxyquire/).
 Used to remove some pain from mocking imports/requires in unit tests.
 
+usage: __npm i resolvequire__  remember – npm package name must be in lower case
+
 For example, you have a file
 ```js
 import module1 from "./module1"
