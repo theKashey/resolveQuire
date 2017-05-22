@@ -3,6 +3,48 @@ Used to remove some pain from mocking imports/requires in unit tests.
 
 usage: __npm i resolvequire__  remember – npm package name must be in lower case
 
+#API
+* withRelativeResolve - to use stubs from some subset of paths
+* withAliasResolve - to enable webpack alias name resolving
+* setWebpackConfig - to set non-default webpack confug
+* withIndirectUsage - to enable indirect usage of Proxyquire,
+* overrideEntryPoint - to override entry point
+  
+#Entry point
+how you normaly use proxyquire?
+```javascript
+import proxyquire from 'proxyquire'
+```
+You use it `directly`. 
+How you can use resolvequire?
+```javascript
+import proxyquire from 'proxyquire';
+import { withAliasResolve } from 'resolvequire';
+const myProxyquire = withAliasResolve(proxyquire);
+```
+A bit ugly? Better to crete a little module, to hide some magic. But you cannot use Proxyquire from other file, or it will be unable to find target file to mock.
+(just try)
+
+How to use resolvequire?
+```javascript
+//test/proxyquire.js
+import Proxyquire from 'proxyquire/lib/proxyquire';  // we need base class
+import { withAliasResolve, withIndirectUsage, overrideEntryPoint}  from 'resolvequire';
+
+overrideEntryPoint(); // override entry point. Defaults to `opener` module
+const withIndirect = withIndirectUsage(Proxyquire);
+const myProxyquire = withAliasResolve(proxyquire);
+
+export default myProxyquire;
+
+
+```
+     
+    
+  
+# What is this for?
+  
+
 For example, you have a file
 ```js
 import module1 from "./module1"
@@ -20,7 +62,7 @@ var lib = require("lib1"); // node_module
 var helper1 = require("stuff/helper1"); // found in project root
 ```
 
-Next you have 100500 files, all having same deps, and you want your unit tests to mock every dependancy they have.
+Next you have 100500 files, all having same deps, and you want your unit tests to mock every dependency they have.
 ```js
  var mockedModule = proxyquire.load('../moduleN.js',{
   './module1.js':{}, // will not passs
@@ -30,19 +72,27 @@ Next you have 100500 files, all having same deps, and you want your unit tests t
   'stuff/module4.js':{}, // will not pass
  });
 ```
-For you - all files have same dependancies. But all files lays in different locations, and `true` requires will be different.
+For you - all files have same dependencies. But all files lays in different locations, and `actual` requires will be different.
 
 For mocking you can use [proxyquire](https://github.com/thlorenz/proxyquire/), but in every case you have to provide extract stubs to overwrite.
 All your files can import modules in same maner, but in final code all requires will be relative to a file. 
 Let me repeat - they all will be different. They all will require different setup for proxyquire.
 
-Lets solve it. (better solution is to use https://github.com/thlorenz/proxyquire/pull/148)
 
 ```js
- var mockedModule = withResolve(proxyquire, '../moduleN.js',{
+ var mockedModule = withRelativeResolve(proxyquire,['../moduleN.js',PROJECTROOT+'/core']).load({
    /*stubsInAnyForm*/
  })
 ```
+And I will search all listed paths and calculate correct stubs.
+
+Or
+```js
+ var mockedModule = withAliasResolve(proxyquire).load({
+   'core/reducer:'....
+ })
+``` 
+And I will calculate correct stubs using webpack aliases.
  
 One command, and it will works.
  

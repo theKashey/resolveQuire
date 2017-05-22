@@ -1,73 +1,63 @@
-const path = require('path');
-const fs = require('fs');
+import resolve from './resolve';
+import aliasResolve, { configureAliases } from './aliasResolve';
 
-const cachedTest = (function () {
-  const cachedTests = {};
-  return (path)=> {
-    if (!(path in cachedTests)) {
-      cachedTests[path] = fs.existsSync(path);
-    }
-    return cachedTests[path];
-  };
-})();
+let thisModule = module;
 
-const lookup = (paths, key) => {
-  let result = key;
-  const hasExtension = path.extname(key);
-  paths.forEach(tryPath => {
-    var targetFile = path.resolve(tryPath, key);
-    if (cachedTest(targetFile)) {
-      result = targetFile;
-    } else {
-      if (!hasExtension) {
-        if (cachedTest(targetFile + '.js') || cachedTest(targetFile + '.json')) {
-          result = targetFile;
-        }
-      }
-    }
-  });
-  return result;
+/**
+ *
+ * @param newModule
+ */
+const overrideEntryPoint = (newModule) => {
+  thisModule = newModule || module.parent;
+  const opener = require.resolve(module.parent.filename);
+  delete require.cache[opener];
 };
 
-const isRelativeQuire = path => (path[0] == '.' || path.indexOf('/') > 0);
-const isRelativeRequire = path => (path[0] == '.');
+function withCustomLoad(proxyquire, callback) {
+  const originalLoad = proxyquire.load;
 
-function resolve(fileToBeRequired, stubs, paths) {
-  const parentDir = path.dirname(require.resolve(module.parent ? module.parent.filename : './'));
-  const fileToBeRequiredLocation = path.join(
-    parentDir,
-    fileToBeRequired
+  proxyquire.load = function (fileName, stubs) {
+    return callback(fileName, stubs, originalLoad);
+  }.bind(proxyquire);
+
+  return proxyquire.load;
+}
+
+function withRelativeResolve(proxyquire, paths) {
+  return withCustomLoad(
+    proxyquire,
+    (fileName, stubs, _load) =>
+      _load.call(proxyquire, fileName, resolve(fileName, stubs, paths, (thisModule || module).parent))
   );
-  const basePath = path.dirname(fileToBeRequiredLocation);
-  const searchPaths = [basePath].concat(paths || []).map(tryPath => path.resolve(parentDir, tryPath));
-
-  const keys = Object.keys(stubs);
-  const result = {};
-
-  keys.forEach(key => {
-    let location = key;
-    if (isRelativeQuire(key)) {
-      let targetFile = lookup(searchPaths, key);
-      if (targetFile !== key) {
-        location = path.relative(basePath, targetFile);
-        if (path.isAbsolute(targetFile) && !isRelativeRequire(location)) {
-          location = '.' + path.sep + location;
-          if (!path.extname(location)) {
-            result[location + '.js'] = stubs[key];
-          }
-        }
-      }
-    }
-    result[location] = stubs[key];
-  });
-  return result;
 }
 
-function withResolve(proxyquire, fileName, stubs, paths) {
-  return proxyquire.load(fileName, resolve(fileName, stubs, paths))
+function withAliasResolve(proxyquire) {
+  return withCustomLoad(
+    proxyquire,
+    (fileName, stubs, _load) =>
+      _load.call(proxyquire, fileName, aliasResolve(fileName, stubs, (thisModule || module).parent))
+  );
 }
+
+function withIndirectUsage(Proxyquire) {
+  delete require.cache[require.resolve(__filename)];
+  return new Proxyquire((thisModule || module).parent);
+}
+
+function setWebpackConfig(conf) {
+  configureAliases(conf);
+}
+
+// delete this module from the cache to force re-require in order to allow resolving test module via parent.module
+delete require.cache[require.resolve(__filename)];
 
 module.exports = {
-  resolve: resolve,
-  withResolve: withResolve
+  withIndirectUsage,
+
+  withAliasResolve,
+  withRelativeResolve,
+
+  setWebpackConfig,
+
+  overrideEntryPoint
 };
