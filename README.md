@@ -2,6 +2,12 @@ Helper library for creating final stubs for [proxyquire](https://github.com/thlo
 Used to remove some pain from mocking imports/requires in unit tests.
 
 usage: __npm i resolvequire__  remember – npm package name must be in lower case
+# About Proxyquire and Resolvequire.
+Proxyquire just proxies nodejs's require in order to make overriding dependencies during testing. But it is quite old and having some interface limitations.
+
+The way to extend Proxyquire abilities - [proxyquire-2](https://github.com/theKashey/proxyquire).
+The way to enable webpack aliases - [proxyquire-webpack-alias](https://github.com/theKashey/proxyquire-webpack-alias) or this - resolvequire.
+I can recommend using [proxyquire-2](https://github.com/theKashey/proxyquire) instead of proxyquire as long in includes some features proxyquire decide not to contain.
 
 #API
 * withRelativeResolve - to use stubs from some subset of paths
@@ -11,7 +17,7 @@ usage: __npm i resolvequire__  remember – npm package name must be in lower ca
 * overrideEntryPoint - to override entry point
   
 #Entry point
-how you normaly use proxyquire?
+how you normally use proxyquire?
 ```javascript
 import proxyquire from 'proxyquire'
 ```
@@ -22,27 +28,33 @@ import proxyquire from 'proxyquire';
 import { withAliasResolve } from 'resolvequire';
 const myProxyquire = withAliasResolve(proxyquire);
 ```
-A bit ugly? Better to crete a little module, to hide some magic. But you cannot use Proxyquire from other file, or it will be unable to find target file to mock.
+3 lines in each file :( A bit ugly? Better to crete a little module, to hide some magic. 
+But _you cannot use Proxyquire from other file_, or it will be unable to find target file to mock.
 (just try)
 
 How to use resolvequire?
 ```javascript
-//test/proxyquire.js
-import Proxyquire from 'proxyquire/lib/proxyquire';  // we need base class
+//test/proxyquire.js - lets create a little helper, in _different_ dirrectory
+import Proxyquire from 'proxyquire/lib/proxyquire';  // we need Proxyquire base class
 import { withAliasResolve, withIndirectUsage, overrideEntryPoint}  from 'resolvequire';
 
-overrideEntryPoint(); // override entry point. Defaults to `opener` module
+// then you will call proxyquire.load(filename) - it will try find filename in THIS dirrectory.
+// THIS == this module, not source test, which requires this helper.
+// one should override entry point.
+
+// override entry point. Defaults to `parent` module -> our test.
+overrideEntryPoint(); 
+
+// create new proxyquire instance.
 const withIndirect = withIndirectUsage(Proxyquire);
+// add magics
 const myProxyquire = withAliasResolve(proxyquire);
-
+// export it
 export default myProxyquire;
-
-
 ```
-     
-    
-  
-# What is this for?
+It is an open question - should I ship this helper, or not.              
+              
+# Stop! What is this for?
   
 
 For example, you have a file
