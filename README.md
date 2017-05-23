@@ -14,6 +14,7 @@ I can recommend using [proxyquire-2](https://github.com/theKashey/proxyquire) in
 * withAliasResolve - to enable webpack alias name resolving
 * setWebpackConfig - to set non-default webpack confug
 * withIndirectUsage - to enable indirect usage of Proxyquire,
+* withAllStubsUsed - to be sure that you write all stubs with out mistakes. So all you write were used.
 * overrideEntryPoint - to override entry point
   
 #Entry point

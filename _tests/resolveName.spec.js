@@ -1,7 +1,6 @@
 import { expect } from 'chai';
 import proxyquire from 'proxyquire';
-import { withRelativeResolve } from '../lib/index.js';
-
+import { withRelativeResolve } from '../src/index.js';
 
 describe('Name resolve', () => {
 
