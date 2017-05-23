@@ -9,15 +9,18 @@ const configureAliases = (conf) => {
 };
 
 
-const relativeName = (a,b) => {
-  const name = relative(a,b);
-  if(name && name[0]!='/' && name[0]!='.'){
-    return './'+name;
+const relativeName = (a, b) => {
+  const name = relative(a, b);
+  if (name && name[0] != '/' && name[0] != '.') {
+    return './' + name;
   }
   return name;
 };
 
 const aliasResolve = (fileName, stubs, relativeModule) => {
+  if (!settings) {
+    readAlises();
+  }
   // nodejs internals
   const sourceFile = Module._resolveFilename(fileName, relativeModule);
   const sourceDir = dirname(sourceFile);

@@ -26,4 +26,20 @@ describe('webpack alias + proxyquire ', () => {
     });
     expect(baz()).to.be.equal('aabbcc');
   });
+
+  it('should keep behavior: ', () => {
+    setWebpackConfig(aliasConfig);
+    const baz = withAliasResolve(proxyquire).noCallThru().load('./lib/a/test.js', {
+      'my-absolute-test-lib/foo': function () {
+        return 'aa'
+      },
+      'same-folder-lib/bar': function () {
+        return 'bb'
+      },
+      '../b/baz': function () {
+        return 'cc'
+      }
+    });
+    expect(baz()).to.be.equal('aabbcc');
+  });
 });
