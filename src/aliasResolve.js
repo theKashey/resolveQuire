@@ -19,7 +19,7 @@ const relativeName = (a, b) => {
 
 const aliasResolve = (fileName, stubs, relativeModule) => {
   if (!settings) {
-    readAlises();
+    settings = readAlises();
   }
   // nodejs internals
   const sourceFile = Module._resolveFilename(fileName, relativeModule);

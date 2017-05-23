@@ -17,6 +17,30 @@ I can recommend using [proxyquire-2](https://github.com/theKashey/proxyquire) in
 * withAllStubsUsed - to be sure that you write all stubs with out mistakes. So all you write were used.
 * overrideEntryPoint - to override entry point
   
+#Example
+```javascript
+  const resolvequire =
+    withAliasResolve(
+      withAllStubsUsed( 
+        proxyquire)
+      )
+    );
+```
+  
+#Why you should use withAllStubsUsed?
+Lets imagine you have a file
+-> /app/helpers/special.js
+And it requires it sibling
+-> /app/helpers/common.js
+And you have alias `app`.
+Long story short, you will just write
+ ```javascript
+ import something from 'app/helpers/common'
+ ```
+Resolvequire will transform this name into `./common`, but webpack _may_ transform it into `../helpers/common` (dunno why).
+Stub will not be mocked. withAllStubsUsed will throw error. You need that error.
+Or just use [proxyquire-webpack-alias](https://github.com/theKashey/proxyquire-webpack-alias) - it has no issues with this. 
+   
 #Entry point
 how you normally use proxyquire?
 ```javascript

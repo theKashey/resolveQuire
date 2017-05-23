@@ -20,11 +20,15 @@ function withCustomLoad(proxyquire, callback) {
     return callback(fileName, stubs, originalLoad);
   }.bind(proxyquire);
 
-  for (const i in proxyquire) {
+  load._parentquire = proxyquire;
+  for (var i in proxyquire) {
     if (proxyquire.hasOwnProperty(i)) {
       load[i] = proxyquire[i];
     }
   }
+  load._resolvequire = true;
+  // the goal is to "push" load to primary object
+  load._parentquire.load = load;
 
   return load;
 }
