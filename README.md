@@ -12,6 +12,8 @@ I can recommend using [proxyquire-2](https://github.com/theKashey/proxyquire) in
 #API
 * withRelativeResolve - to use stubs from some subset of paths
 * withAliasResolve - to enable webpack alias name resolving
+* withRelativeFileName - to enable same for mocking file
+* withAliasInFileName - to enable same for mocking file
 * setWebpackConfig - to set non-default webpack confug
 * withIndirectUsage - to enable indirect usage of Proxyquire,
 * withAllStubsUsed - to be sure that you write all stubs with out mistakes. So all you write were used.
@@ -20,11 +22,15 @@ I can recommend using [proxyquire-2](https://github.com/theKashey/proxyquire) in
 #Example
 ```javascript
   const resolvequire =
-    withAliasResolve(
-      withAllStubsUsed( 
-        proxyquire)
-      )
-    );
+      withAliasInFileName(
+        withAliasResolve(
+          withAllStubsUsed( 
+            proxyquire)
+          )
+        )
+      );
+  
+   resolvequire.load('alias/helper/foo',{ 'alias/module/bar':{} });   
 ```
   
 #Why you should use withAllStubsUsed?

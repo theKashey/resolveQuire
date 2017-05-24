@@ -1,3 +1,4 @@
+import { basename } from 'path';
 import resolve from './resolve';
 import aliasResolve, { configureAliases } from './aliasResolve';
 import isAllStubsUsed from './withAllStubsUsed';
@@ -97,6 +98,40 @@ function withAllStubsUsed(proxyquire) {
   );
 }
 
+/**
+ * will also use aliases in fileName
+ * @param proxyquire
+ */
+function withAliasInFileName(proxyquire) {
+  return withCustomLoad(
+    proxyquire,
+    (fileName, stubs, _load) => {
+      const parent = (thisModule || module).parent;
+      const aliases = aliasResolve(parent.filename, {
+        [fileName]: true
+      }, parent);
+      return _load.call(proxyquire, Object.keys(aliases)[0], stubs)
+    }
+  );
+}
+
+/**
+ * will also try to resolve fileName
+ * @param proxyquire
+ */
+function withRelativeFileName(proxyquire, paths) {
+  return withCustomLoad(
+    proxyquire,
+    (fileName, stubs, _load) => {
+      const parent = (thisModule || module).parent;
+      const aliases = resolve(basename(parent.filename), {
+        [fileName]: true
+      }, paths, parent);
+      return _load.call(proxyquire, Object.keys(aliases)[0], stubs)
+    }
+  );
+}
+
 // delete this module from the cache to force re-require in order to allow resolving test module via parent.module
 delete require.cache[require.resolve(__filename)];
 
@@ -105,6 +140,9 @@ module.exports = {
 
   withAliasResolve,
   withRelativeResolve,
+
+  withAliasInFileName,
+  withRelativeFileName,
 
   withAllStubsUsed,
 
