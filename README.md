@@ -3,6 +3,9 @@ Used to remove some pain from mocking imports/requires in unit tests.
 
 usage: __npm i resolvequire__  remember – npm package name must be in lower case
 # About Proxyquire and Resolvequire.
+
+[![Greenkeeper badge](https://badges.greenkeeper.io/theKashey/resolveQuire.svg)](https://greenkeeper.io/)
+
 Proxyquire just proxies nodejs's require in order to make overriding dependencies during testing. But it is quite old and having some interface limitations.
 
 The way to extend Proxyquire abilities - [proxyquire-2](https://github.com/theKashey/proxyquire).
